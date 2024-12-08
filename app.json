@@ -1,5 +1,16 @@
 {
   "expo": {
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./node_modules/@react-native-vector-icons/<font-package>/fonts/<font-file>.ttf",
+            "./node_modules/@react-native-vector-icons/simple-line-icons/fonts/SimpleLineIcons.ttf"
+          ]
+        }
+      ]
+    ],
     "name": "tonguii",
     "slug": "tonguii",
     "version": "1.0.0",
