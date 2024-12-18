@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { PaperSelect } from "react-native-paper-select";
-import dogBreeds from "../../assets/data/dog_breed_size.json";
 import { ListItem } from "react-native-paper-select/lib/typescript/interface/paperSelect.interface";
 import { Button, TextInput } from "react-native-paper";
 import { DatePickerModal } from "react-native-paper-dates";
+import { DogData } from "../models/DogData";
+import { getDogBreeds } from "../utils/resources";
+import { DogBreed } from "../models/DogBreed";
 
-export function DogForm() {
+export function DogForm({
+  calculateAge,
+}: {
+  calculateAge: (dog: DogData) => void;
+}) {
   function getBreedFromJson(): ListItem[] {
-    dogBreeds.sort();
+    const dogBreeds: DogBreed[] = getDogBreeds();
 
     return dogBreeds.map((breed) => {
       return {
@@ -17,7 +23,7 @@ export function DogForm() {
     });
   }
 
-  const [gender, setGender] = useState({
+  const [breed, setBreed] = useState({
     value: "",
     list: getBreedFromJson(),
     selectedList: [],
@@ -46,28 +52,24 @@ export function DogForm() {
   }, []);
 
   const onSelect = (value: any) => {
-    setGender({
-      ...gender,
+    setBreed({
+      ...breed,
       value: value.text,
       selectedList: value.selectedList,
     });
-  };
-
-  const calculateAge = () => {
-    console.log("Calculate age");
   };
 
   return (
     <>
       <PaperSelect
         label="Select Breed"
-        value={gender.value}
+        value={breed.value}
         textInputProps={{
           left: <TextInput.Icon icon="dog-side" />,
         }}
         onSelection={onSelect}
-        arrayList={[...gender.list]}
-        selectedArrayList={gender.selectedList}
+        arrayList={[...breed.list]}
+        selectedArrayList={breed.selectedList}
         multiEnable={false}
       />
       <TextInput
@@ -86,7 +88,16 @@ export function DogForm() {
         inputFormat="MM/DD/YYYY"
         onConfirm={onConfirmSingle}
       />
-      <Button mode="contained" onPress={calculateAge} style={{ marginTop: 40 }}>
+      <Button
+        mode="contained"
+        onPress={() =>
+          calculateAge({
+            breedId: Number(breed.selectedList[0]._id),
+            birthDate: birth.date,
+          })
+        }
+        style={{ marginTop: 40 }}
+      >
         Calculate
       </Button>
     </>
