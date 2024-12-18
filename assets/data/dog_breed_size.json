@@ -1,0 +1,22 @@
+[
+  { "id": 1, "name": "Chihuahua", "size": "small" },
+  { "id": 2, "name": "Pomeranian", "size": "small" },
+  { "id": 3, "name": "Shih Tzu", "size": "small" },
+  { "id": 4, "name": "Yorkshire Terrier", "size": "small" },
+  { "id": 5, "name": "Miniature Schnauzer", "size": "small" },
+  { "id": 6, "name": "Beagle", "size": "medium" },
+  { "id": 7, "name": "Cocker Spaniel", "size": "medium" },
+  { "id": 8, "name": "Border Collie", "size": "medium" },
+  { "id": 9, "name": "Australian Shepherd", "size": "medium" },
+  { "id": 10, "name": "Bulldog", "size": "medium" },
+  { "id": 11, "name": "Labrador Retriever", "size": "large" },
+  { "id": 12, "name": "Golden Retriever", "size": "large" },
+  { "id": 13, "name": "German Shepherd", "size": "large" },
+  { "id": 14, "name": "Rottweiler", "size": "large" },
+  { "id": 15, "name": "Siberian Husky", "size": "large" },
+  { "id": 16, "name": "Boxer", "size": "large" },
+  { "id": 17, "name": "Great Dane", "size": "giant" },
+  { "id": 18, "name": "Mastiff", "size": "giant" },
+  { "id": 19, "name": "Saint Bernard", "size": "giant" },
+  { "id": 20, "name": "Bernese Mountain Dog", "size": "giant" }
+]

@@ -1,14 +1,22 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { PaperProvider } from 'react-native-paper';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import { Button, DefaultTheme, PaperProvider } from "react-native-paper";
+import Home from "./src/screens/Home";
+import theming from "./assets/theming.json";
+import "@expo/metro-runtime";
+
+// Extend the default theme
+const theme = {
+  ...DefaultTheme,
+  colors: theming.colors, // Copy it from the color codes scheme and then use it here
+};
 
 export default function App() {
   return (
-    <PaperProvider>
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <PaperProvider theme={theme}>
+      <View>
+        <Home />
+      </View>
     </PaperProvider>
   );
 }
@@ -16,8 +24,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

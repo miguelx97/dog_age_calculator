@@ -1,0 +1,22 @@
+{
+  "small": {
+    "initial": 15,
+    "secondYear": 9,
+    "annual": 4
+  },
+  "medium": {
+    "initial": 15,
+    "secondYear": 9,
+    "annual": 5
+  },
+  "large": {
+    "initial": 15,
+    "secondYear": 9,
+    "annual": 6
+  },
+  "giant": {
+    "initial": 15,
+    "secondYear": 9,
+    "annual": 7
+  }
+}
