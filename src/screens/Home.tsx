@@ -20,7 +20,7 @@ export default function Home() {
           <DogForm calculateAge={calculateAge} />
           <Text variant="bodySmall" style={styles.result}>
             {humanAge
-              ? `Your dog is ${humanAge.humanAge.getFullYear()} years old`
+              ? `Your dog is ${humanAge.humanAge.toString()} years old`
               : ""}
           </Text>
         </View>

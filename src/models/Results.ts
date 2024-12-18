@@ -1,11 +1,13 @@
 import dayjs, { Dayjs, } from "dayjs";
+import duration from 'dayjs/plugin/duration'
 import { getDogBreeds, getDogSizeAge } from "../utils/resources";
 import { DogBreed, Size } from "./DogBreed";
 import { DogSizeAge } from "./DogSizeAge";
+dayjs.extend(duration);
 
 export class Results {
-    private _dogAge: Date;
-    private _humanAge: Date;
+    private _dogAge: number;
+    private _humanAge: number;
     private _humanBirthday: Date;
 
     calculate(dogBirth: Date, dogBreedId: number): void {
@@ -17,7 +19,7 @@ export class Results {
         const currentDate: Dayjs = dayjs()
         const dogBirthDate: Dayjs = dayjs(dogBirth);
         const dogAgeMs: number = currentDate.diff(dogBirthDate, 'milliseconds');
-        this._dogAge = new Date(dogAgeMs);
+        this._dogAge = dogAgeMs;
     }
 
     private setHumanAge(dogBreedId: number) {
@@ -43,18 +45,35 @@ export class Results {
         let humanAge: Dayjs = dayjs(totalMs);
 
         // Multiply the factor by the dog's age
-        this._humanAge = new Date(humanAge.unix() * 1000);
+        this._humanAge = humanAge.unix() * 1000;
     }
 
-    get dogAge(): Date {
-        return this._dogAge;
+    get dogAge(): Duration {
+        return new Duration(this._dogAge);
     }
 
-    set dogAge(value: Date) {
-        this._dogAge = value;
+    get humanAge(): Duration {
+        return new Duration(this._humanAge);
     }
 
-    get humanAge(): Date {
-        return this._humanAge;
+    get humanBirthday(): Date {
+        return this._humanBirthday;
+    }
+}
+
+class Duration {
+    days: number;
+    months: number;
+    years: number;
+
+    constructor(ms: number) {
+        const duration = dayjs.duration(ms);
+        this.days = duration.days();
+        this.months = duration.months();
+        this.years = duration.years();
+    }
+
+    toString(): string {
+        return `${this.years} years, ${this.months} months, and ${this.days} days`;
     }
 }
