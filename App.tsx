@@ -4,6 +4,7 @@ import { Button, DefaultTheme, PaperProvider } from "react-native-paper";
 import Home from "./src/screens/Home";
 import theming from "./assets/theming.json";
 import "@expo/metro-runtime";
+import DogDataContextProvider from "./src/store/dog-data-context";
 
 // Extend the default theme
 const theme = {
@@ -14,9 +15,9 @@ const theme = {
 export default function App() {
   return (
     <PaperProvider theme={theme}>
-      <View>
+      <DogDataContextProvider>
         <Home />
-      </View>
+      </DogDataContextProvider>
     </PaperProvider>
   );
 }

@@ -1,8 +1,9 @@
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { getDogBreeds, getDogSizeAge } from "../utils/resources";
+import { getDogSizeAge, getMapDogBreeds } from "../services/resources";
 import { DogBreed, Size } from "./DogBreed";
 import { DogSizeAge } from "./DogSizeAge";
+import { localeDateOptions } from "../utils/utils";
 
 dayjs.extend(duration);
 
@@ -26,10 +27,10 @@ export class Results {
     }
 
     private calculateHumanAge(dogBreedId: number): number {
-        const dogBreeds: DogBreed[] = getDogBreeds();
+        const dogBreeds: Map<number, DogBreed> = getMapDogBreeds();
         const dogsSizesByAge: Map<Size, DogSizeAge> = getDogSizeAge();
 
-        const dogBreed = dogBreeds.find((breed) => breed.id === dogBreedId);
+        const dogBreed = dogBreeds.get(dogBreedId);
         if (!dogBreed) {
             throw new Error("Invalid dog breed ID");
         }
@@ -73,7 +74,7 @@ export class Results {
     }
 
     get dogBirthFormated(): String {
-        return this._dogBirth.toLocaleDateString();
+        return this._dogBirth.toLocaleDateString(localeDateOptions.lang, localeDateOptions.long);
     }
 
     get humanBirthFormated(): String {

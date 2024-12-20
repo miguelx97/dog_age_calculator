@@ -3,9 +3,6 @@ import { StyleSheet, View } from "react-native";
 import { Card, List } from "react-native-paper";
 
 export function DogResults({ results }) {
-  if (!results) {
-    return null;
-  }
   return (
     <View style={styles.result}>
       <Card>
@@ -24,12 +21,12 @@ export function DogResults({ results }) {
             </List.Subheader>
             <List.Item title={results.dogBirthFormated} />
           </List.Section>
-          <List.Section>
+          {/* <List.Section>
             <List.Subheader style={styles.subheader}>
               Human's Birthday
             </List.Subheader>
             <List.Item title={results.humanBirthFormated} />
-          </List.Section>
+          </List.Section> */}
         </Card.Content>
       </Card>
     </View>

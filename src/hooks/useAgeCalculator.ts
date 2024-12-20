@@ -8,8 +8,9 @@ export const useAgeCalculator = (): {
 } => {
     const [results, setResults] = useState<Results | undefined>(undefined);
 
-    const calculate = ({ breedId, birthDate }) => {
-        console.log("🚀 ~ calculateHumanAge ~ { breedId, birthDate }:", { breedId, birthDate })
+    const calculate = (dog: DogData) => {
+        if (!dog) return setResults(undefined);
+        const { birthDate, breedId } = dog;
         if (!birthDate || !breedId) {
             return;
         }

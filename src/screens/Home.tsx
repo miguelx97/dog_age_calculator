@@ -1,20 +1,26 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Image, ScrollView, StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
 import { DogForm } from "../components/DogForm";
 import logo from "../../assets/images/logo_perrete.png";
 import { useAgeCalculator } from "../hooks/useAgeCalculator";
-import { DogData } from "../models/DogData";
 import { DogResults } from "../components/DogResults";
 import { Preferences } from "../services/preferences";
+import { DogDataContext } from "../store/dog-data-context";
+import { RestartButton } from "../components/RestartButton";
 
 export default function Home() {
   const { results, calculate } = useAgeCalculator();
+  const { dog } = useContext(DogDataContext);
 
-  async function calculateAge(dog: DogData) {
+  useEffect(() => {
     calculate(dog);
-    Preferences.set("dog", dog);
-  }
+    if (dog) {
+      Preferences.set("dog", dog);
+    } else {
+      Preferences.remove("dog");
+    }
+  }, [dog]);
 
   return (
     <ScrollView>
@@ -22,9 +28,14 @@ export default function Home() {
         <Image source={logo} style={styles.image} />
         <Text variant="headlineLarge">Dog Age Calculator</Text>
         <View style={styles.form}>
-          <DogForm calculateAge={calculateAge} />
+          <DogForm />
         </View>
-        <DogResults results={results} />
+        {results && (
+          <>
+            <DogResults results={results} />
+            <RestartButton />
+          </>
+        )}
       </View>
     </ScrollView>
   );

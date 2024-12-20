@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { PaperSelect } from "react-native-paper-select";
 import { ListItem } from "react-native-paper-select/lib/typescript/interface/paperSelect.interface";
-import { Button, TextInput, Text } from "react-native-paper";
+import { TextInput } from "react-native-paper";
 import { DatePickerModal } from "react-native-paper-dates";
-import { DogData } from "../models/DogData";
-import { getDogBreeds } from "../utils/resources";
+import { getDogBreeds, getMapDogBreeds } from "../services/resources";
 import { DogBreed } from "../models/DogBreed";
 import { Preferences } from "../services/preferences";
+import { DogDataContext } from "../store/dog-data-context";
+import { DogData } from "../models/DogData";
+import { localeDateOptions } from "../utils/utils";
 
-export function DogForm({
-  calculateAge,
-}: {
-  calculateAge: (dog: DogData) => void;
-}) {
+export function DogForm() {
   function getBreedFromJson(): ListItem[] {
     const dogBreeds: DogBreed[] = getDogBreeds();
 
@@ -24,34 +22,7 @@ export function DogForm({
     });
   }
 
-  useEffect(() => {
-    Preferences.get("dog").then((dogPreferences) => {
-      console.log("🚀 ~ useEffect ~ dogPreferences:", dogPreferences);
-
-      if (dogPreferences) {
-        const dog: DogData = {
-          breedId: dogPreferences?.breedId,
-          birthDate: dogPreferences?.birthDate
-            ? new Date(dogPreferences?.birthDate)
-            : null,
-        };
-        console.log("🚀 ~ useEffect ~ dog:", dog);
-        const breed: DogBreed = getDogBreeds().find(
-          (breed) => breed.id === dog.breedId
-        );
-        setBreed({
-          value: breed?.name || "",
-          list: getBreedFromJson(),
-          selectedList: breed ? [breed] : [],
-        });
-        setBirth({
-          date: dog.birthDate,
-          open: false,
-        });
-        calculateAge(dog);
-      }
-    });
-  }, []);
+  const { setDog, dog } = useContext(DogDataContext);
 
   const [breed, setBreed] = useState({
     value: "",
@@ -68,6 +39,37 @@ export function DogForm({
     open: false,
   });
 
+  useEffect(() => {
+    Preferences.get("dog").then((dogPreferences) => {
+      if (!dogPreferences) return;
+      const dog: DogData = {
+        breedId: dogPreferences?.breedId,
+        birthDate: dogPreferences?.birthDate
+          ? new Date(dogPreferences?.birthDate)
+          : null,
+      };
+      console.log("🚀 ~ Preferences.get ~ dog:", dog);
+
+      setBreed({
+        ...breed,
+        value: getNameDogBreed(dog.breedId),
+        selectedList: [
+          {
+            _id: String(dog.breedId),
+            value: getNameDogBreed(dog.breedId),
+          },
+        ],
+      });
+
+      setBirth({
+        ...birth,
+        date: dog.birthDate,
+      });
+
+      setDog(dog);
+    });
+  }, []);
+
   // Correct the setOpen function to directly update the `open` property
   const setOpen = (isOpen: boolean): void =>
     setBirth((prevBirth) => ({ ...prevBirth, open: isOpen }));
@@ -75,7 +77,7 @@ export function DogForm({
   const onDismissSingle = React.useCallback(() => setOpen(false), []);
 
   const onConfirmSingle = (params: any) => {
-    calculateAge({
+    setDog({
       breedId: Number(breed?.selectedList[0]?._id),
       birthDate: params.date,
     });
@@ -84,7 +86,7 @@ export function DogForm({
 
   // Breed selection handler
   const onSelect = (value: any) => {
-    calculateAge({
+    setDog({
       breedId: Number(value.selectedList[0]?._id),
       birthDate: birth.date,
     });
@@ -95,11 +97,14 @@ export function DogForm({
     });
   };
 
+  const getNameDogBreed = (breedId: number): string =>
+    getMapDogBreeds().get(breedId)?.name || "";
+
   return (
     <>
       <PaperSelect
         label="Select Breed"
-        value={breed.value}
+        value={getNameDogBreed(dog?.breedId)}
         textInputProps={{
           left: <TextInput.Icon icon="dog-side" />,
         }}
@@ -111,18 +116,24 @@ export function DogForm({
       <TextInput
         label="Birth Date"
         left={<TextInput.Icon icon="calendar" />}
-        value={birth.date ? birth.date.toLocaleDateString() : ""}
+        value={
+          dog?.birthDate
+            ? dog.birthDate.toLocaleDateString(
+                localeDateOptions.lang,
+                localeDateOptions.short
+              )
+            : ""
+        }
         onFocus={() => setOpen(true)} // Open the date picker
       />
 
       <DatePickerModal
-        locale="en"
+        locale="es"
         label="Select birth date"
         mode="single"
         visible={birth.open}
         onDismiss={onDismissSingle}
-        date={birth.date}
-        inputFormat="MM/DD/YYYY"
+        date={dog?.birthDate ?? new Date()}
         onConfirm={onConfirmSingle}
       />
     </>

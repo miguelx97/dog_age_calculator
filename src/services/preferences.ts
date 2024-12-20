@@ -9,4 +9,8 @@ export class Preferences {
         const value = await AsyncStorage.getItem(key);
         return value ? JSON.parse(value) : null;
     }
+
+    static async remove(key: string) {
+        await AsyncStorage.removeItem(key);
+    }
 }
