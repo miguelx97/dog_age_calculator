@@ -1,19 +1,25 @@
 import { useState } from "react";
 import { Results } from "../models/Results";
+import { DogData } from "../models/DogData";
 
-export const useAgeCalculator = () => {
-    const [humanAge, setHumanAge] = useState<Results | undefined>(undefined);
+export const useAgeCalculator = (): {
+    results: Results | undefined;
+    calculate: (dog: DogData) => void;
+} => {
+    const [results, setResults] = useState<Results | undefined>(undefined);
 
-    const calculateHumanAge = ({ breedId, birthDate }) => {
-        const currentYear = new Date().getFullYear();
-        const birthYear = new Date(birthDate).getFullYear();
+    const calculate = ({ breedId, birthDate }) => {
+        console.log("🚀 ~ calculateHumanAge ~ { breedId, birthDate }:", { breedId, birthDate })
+        if (!birthDate || !breedId) {
+            return;
+        }
         const results = new Results();
         results.calculate(birthDate, breedId);
-        setHumanAge(results);
+        setResults(results);
     }
 
     return {
-        humanAge,
-        calculateHumanAge,
+        results,
+        calculate,
     }
 };

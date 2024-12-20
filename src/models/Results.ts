@@ -1,63 +1,83 @@
-import dayjs, { Dayjs, } from "dayjs";
-import duration from 'dayjs/plugin/duration'
+import dayjs, { Dayjs } from "dayjs";
+import duration from "dayjs/plugin/duration";
 import { getDogBreeds, getDogSizeAge } from "../utils/resources";
 import { DogBreed, Size } from "./DogBreed";
 import { DogSizeAge } from "./DogSizeAge";
+
 dayjs.extend(duration);
 
 export class Results {
-    private _dogAge: number;
-    private _humanAge: number;
-    private _humanBirthday: Date;
+    private _dogAgeMs: number; // dog age in milliseconds
+    private _humanAgeMs: number; // human age in milliseconds
+    private _dogBirth: Date;
+    private _humanBirth: Date;
 
     calculate(dogBirth: Date, dogBreedId: number): void {
-        this.setDogAge(dogBirth);
-        this.setHumanAge(dogBreedId);
+        this._dogBirth = dogBirth;
+        this._dogAgeMs = this.calculateDogAge(dogBirth);
+        this._humanAgeMs = this.calculateHumanAge(dogBreedId);
+        this._humanBirth = this.calculateHumanBirth();
     }
 
-    private setDogAge(dogBirth: Date): void {
-        const currentDate: Dayjs = dayjs()
-        const dogBirthDate: Dayjs = dayjs(dogBirth);
-        const dogAgeMs: number = currentDate.diff(dogBirthDate, 'milliseconds');
-        this._dogAge = dogAgeMs;
+    private calculateDogAge(dogBirth: Date): number {
+        const currentDate = dayjs();
+        const dogBirthDate = dayjs(dogBirth);
+        return currentDate.diff(dogBirthDate, "milliseconds");
     }
 
-    private setHumanAge(dogBreedId: number) {
+    private calculateHumanAge(dogBreedId: number): number {
         const dogBreeds: DogBreed[] = getDogBreeds();
         const dogsSizesByAge: Map<Size, DogSizeAge> = getDogSizeAge();
 
         const dogBreed = dogBreeds.find((breed) => breed.id === dogBreedId);
-        const dogSizeAge = dogsSizesByAge.get(dogBreed.size ?? Size.Medium);
-
-        const dogAge: Dayjs = dayjs(this._dogAge);
-        let totalMs: number = 0;
-
-        if ((dayjs()).diff(dogAge, 'year') < 1) {
-            totalMs = dogAge.unix() * dogSizeAge.firstYear;
-        } else if ((dayjs()).diff(dogAge, 'year') < 2) {
-            const dogYearsSubstractFirstYear = dogAge.diff(dayjs(), 'year') - 1;
-            totalMs = dogAge.unix() * dogSizeAge.firstYear + dogYearsSubstractFirstYear * dogSizeAge.secondYear;
-        } else {
-            const dogYearsSubstractFirstYear = dogAge.diff(dayjs(), 'year') - 1;
-            const dogYearsSubstractSecondYear = dogAge.diff(dayjs(), 'year') - 2;
-            totalMs = dogAge.unix() * dogSizeAge.firstYear + dogYearsSubstractFirstYear * dogSizeAge.secondYear + dogYearsSubstractSecondYear * dogSizeAge.annual;
+        if (!dogBreed) {
+            throw new Error("Invalid dog breed ID");
         }
-        let humanAge: Dayjs = dayjs(totalMs);
 
-        // Multiply the factor by the dog's age
-        this._humanAge = humanAge.unix() * 1000;
+        const dogSizeAge = dogsSizesByAge.get(dogBreed.size ?? Size.Medium);
+        if (!dogSizeAge) {
+            throw new Error("Invalid size to age mapping");
+        }
+
+        const dogAgeYears = this._dogAgeMs / (1000 * 60 * 60 * 24 * 365.25);
+        let humanAgeYears = 0;
+
+        if (dogAgeYears <= 1) {
+            humanAgeYears = dogAgeYears * dogSizeAge.firstYear;
+        } else if (dogAgeYears <= 2) {
+            humanAgeYears =
+                dogSizeAge.firstYear +
+                (dogAgeYears - 1) * dogSizeAge.secondYear;
+        } else {
+            humanAgeYears =
+                dogSizeAge.firstYear +
+                dogSizeAge.secondYear +
+                (dogAgeYears - 2) * dogSizeAge.annual;
+        }
+
+        return humanAgeYears * 1000 * 60 * 60 * 24 * 365.25;
+    }
+
+    calculateHumanBirth(): Date {
+        const currentDate = dayjs();
+        const humanBirthDate = currentDate.subtract(this._humanAgeMs, "milliseconds");
+        return humanBirthDate.toDate();
     }
 
     get dogAge(): Duration {
-        return new Duration(this._dogAge);
+        return new Duration(this._dogAgeMs);
     }
 
     get humanAge(): Duration {
-        return new Duration(this._humanAge);
+        return new Duration(this._humanAgeMs);
     }
 
-    get humanBirthday(): Date {
-        return this._humanBirthday;
+    get dogBirthFormated(): String {
+        return this._dogBirth.toLocaleDateString();
+    }
+
+    get humanBirthFormated(): String {
+        return this._humanBirth.toLocaleDateString();
     }
 }
 

@@ -1,42 +1,41 @@
-import React, { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
+import React, { useEffect } from "react";
+import { Image, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import { DogForm } from "../components/DogForm";
 import logo from "../../assets/images/logo_perrete.png";
 import { useAgeCalculator } from "../hooks/useAgeCalculator";
 import { DogData } from "../models/DogData";
+import { DogResults } from "../components/DogResults";
+import { Preferences } from "../services/preferences";
 
 export default function Home() {
-  const { humanAge, calculateHumanAge } = useAgeCalculator();
-  function calculateAge(dog: DogData) {
-    calculateHumanAge(dog);
+  const { results, calculate } = useAgeCalculator();
+
+  async function calculateAge(dog: DogData) {
+    calculate(dog);
+    Preferences.set("dog", dog);
   }
+
   return (
-    <View>
+    <ScrollView>
       <View style={styles.container}>
         <Image source={logo} style={styles.image} />
         <Text variant="headlineLarge">Dog Age Calculator</Text>
         <View style={styles.form}>
           <DogForm calculateAge={calculateAge} />
-          <Text variant="bodySmall" style={styles.result}>
-            {humanAge
-              ? `Your dog is ${humanAge.humanAge.toString()} years old`
-              : ""}
-          </Text>
         </View>
+        <DogResults results={results} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
-    justifyContent: "center",
     alignItems: "center",
   },
   form: {
-    width: "90%",
+    width: "85%",
     maxWidth: 400,
     marginTop: 40,
   },
@@ -45,9 +44,5 @@ const styles = StyleSheet.create({
     height: 150,
     resizeMode: "contain",
     marginTop: 40,
-  },
-  result: {
-    textAlign: "center",
-    marginTop: 20,
   },
 });

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PaperSelect } from "react-native-paper-select";
 import { ListItem } from "react-native-paper-select/lib/typescript/interface/paperSelect.interface";
-import { Button, TextInput } from "react-native-paper";
+import { Button, TextInput, Text } from "react-native-paper";
 import { DatePickerModal } from "react-native-paper-dates";
 import { DogData } from "../models/DogData";
 import { getDogBreeds } from "../utils/resources";
 import { DogBreed } from "../models/DogBreed";
+import { Preferences } from "../services/preferences";
 
 export function DogForm({
   calculateAge,
@@ -23,6 +24,35 @@ export function DogForm({
     });
   }
 
+  useEffect(() => {
+    Preferences.get("dog").then((dogPreferences) => {
+      console.log("🚀 ~ useEffect ~ dogPreferences:", dogPreferences);
+
+      if (dogPreferences) {
+        const dog: DogData = {
+          breedId: dogPreferences?.breedId,
+          birthDate: dogPreferences?.birthDate
+            ? new Date(dogPreferences?.birthDate)
+            : null,
+        };
+        console.log("🚀 ~ useEffect ~ dog:", dog);
+        const breed: DogBreed = getDogBreeds().find(
+          (breed) => breed.id === dog.breedId
+        );
+        setBreed({
+          value: breed?.name || "",
+          list: getBreedFromJson(),
+          selectedList: breed ? [breed] : [],
+        });
+        setBirth({
+          date: dog.birthDate,
+          open: false,
+        });
+        calculateAge(dog);
+      }
+    });
+  }, []);
+
   const [breed, setBreed] = useState({
     value: "",
     list: getBreedFromJson(),
@@ -39,19 +69,25 @@ export function DogForm({
   });
 
   // Correct the setOpen function to directly update the `open` property
-  const setOpen = (isOpen: boolean): void => {
+  const setOpen = (isOpen: boolean): void =>
     setBirth((prevBirth) => ({ ...prevBirth, open: isOpen }));
+
+  const onDismissSingle = React.useCallback(() => setOpen(false), []);
+
+  const onConfirmSingle = (params: any) => {
+    calculateAge({
+      breedId: Number(breed?.selectedList[0]?._id),
+      birthDate: params.date,
+    });
+    setBirth({ date: params.date, open: false }); // Update both date and open
   };
 
-  const onDismissSingle = React.useCallback(() => {
-    setOpen(false); // Close the modal
-  }, []);
-
-  const onConfirmSingle = React.useCallback((params) => {
-    setBirth({ date: params.date, open: false }); // Update both date and open
-  }, []);
-
+  // Breed selection handler
   const onSelect = (value: any) => {
+    calculateAge({
+      breedId: Number(value.selectedList[0]?._id),
+      birthDate: birth.date,
+    });
     setBreed({
       ...breed,
       value: value.text,
@@ -78,6 +114,7 @@ export function DogForm({
         value={birth.date ? birth.date.toLocaleDateString() : ""}
         onFocus={() => setOpen(true)} // Open the date picker
       />
+
       <DatePickerModal
         locale="en"
         label="Select birth date"
@@ -88,18 +125,6 @@ export function DogForm({
         inputFormat="MM/DD/YYYY"
         onConfirm={onConfirmSingle}
       />
-      <Button
-        mode="contained"
-        onPress={() =>
-          calculateAge({
-            breedId: Number(breed.selectedList[0]._id),
-            birthDate: birth.date,
-          })
-        }
-        style={{ marginTop: 40 }}
-      >
-        Calculate
-      </Button>
     </>
   );
 }
